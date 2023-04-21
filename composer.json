@@ -1,0 +1,34 @@
+{
+    "name": "githen/laravel-yidun",
+    "description": "基于laravel的网易易盾内容安全",
+    "license": "MIT",
+    "type": "library",
+    "autoload": {
+      "psr-4": {
+        "Githen\\LaravelYidun\\": "src/Githen/LaravelYidun"
+      }
+    },
+    "authors": [
+      {
+        "name": "nanjishidu",
+        "email": "yijialiu212@gmail.com"
+      }
+    ],
+    "require": {
+      "php": "^7.3",
+      "ext-json": "*",
+      "illuminate/support": "^6.20",
+      "guzzlehttp/guzzle": "~6.0"
+    },
+    "extra": {
+      "laravel": {
+        "providers": [
+          "Githen\\LaravelYidun\\YidunServiceProvider"
+        ],
+        "aliases": {
+          "Yidun": "Githen\\LaravelYidun\\Facades\\Yidun"
+        }
+      }
+    }
+  }
+  

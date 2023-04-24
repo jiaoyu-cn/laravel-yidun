@@ -2,7 +2,7 @@
 
 namespace Githen\LaravelYidun\Traits;
 
-class MediaTrait
+trait MediaTrait
 {
     /**
      * 融媒体解决方案接口提交
@@ -15,6 +15,7 @@ class MediaTrait
         if ($checkData['code'] != '0000') {
             return $this->message('2000', $checkData['mesage']);
         }
+
         $uri = 'https://as.dun.163.com/v2/mediasolution/submit';
         $params['version'] = 'v2';
         $callbackURL = config('yidun.media_solution.callback_url');
@@ -23,53 +24,13 @@ class MediaTrait
         }
         $resp = $this->httpPost($uri, ['form_params' => $params]);
         if ($resp['code'] != 200) {
-            return $this->message('2000', '检测失败', $resp['data']);
+            return $this->message('2000', '检测失败', $resp['data'] ?? '');
         }
         if (empty($resp['result']['antispam'])) {
             return $this->message('2000', '检测结果格式异常');
         }
 
         return $this->message('0000', '检测成功', $resp['result']['antispam']);
-    }
-
-    /**
-     * 图片检测
-     * @param array $params
-     * @return array
-     */
-    public function mediaImage($url)
-    {
-        return $this->mediaSubmit(['content' => ['type' => 'image', 'data' => $url]]);
-    }
-
-    /**
-     * 音频检测
-     * @param steing $url
-     * @return array
-     */
-    public function mediaAudio($url)
-    {
-        return $this->mediaSubmit(['content' => ['type' => 'audio', 'data' => $url]]);
-    }
-
-    /**
-     * 音视频检测
-     * @param steing $url
-     * @return array
-     */
-    public function mediaAudioVideo($url)
-    {
-        return $this->mediaSubmit(['content' => ['type' => 'audiovideo', 'data' => $url]]);
-    }
-
-    /**
-     * 文档检测
-     * @param steing $url
-     * @return array
-     */
-    public function mediaFile($url)
-    {
-        return $this->mediaSubmit(['content' => ['type' => 'file', 'data' => $url]]);
     }
 
     /**
@@ -162,10 +123,10 @@ class MediaTrait
         if (count($taskIds) > 100) {
             return $this->message('2000', '单次查询支持最多查询100条数据');
         }
-        $params['taskIds'] = $taskIds;
+        $params['taskIds'] = json_encode($taskIds, JSON_UNESCAPED_UNICODE);
         $resp = $this->httpPost($uri, ['form_params' => $params]);
         if ($resp['code'] != 200) {
-            return $this->message('2000', '查询失败', $resp['data']);
+            return $this->message('2000', '查询失败', $resp['data'] ?? '');
         }
         return $this->message('0000', '查询成功', $resp['result']);
     }
@@ -181,7 +142,7 @@ class MediaTrait
         $params['version'] = 'v2';
         $resp = $this->httpPost($uri, ['form_params' => $params]);
         if ($resp['code'] != 200) {
-            return $this->message('2000', '查询失败', $resp['data']);
+            return $this->message('2000', '查询失败', $resp['data'] ?? '');
         }
         return $this->message('0000', '查询成功', $resp['result']);
     }

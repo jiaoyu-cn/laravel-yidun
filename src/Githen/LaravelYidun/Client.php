@@ -57,7 +57,7 @@ class Client
     {
         $this->secretKey = $secretKey;
     }
-    
+
     /**
      * Default constructor
      *
@@ -66,8 +66,8 @@ class Client
      */
     public function __construct($config)
     {
-        $this->setAppId($config['secret_id']);
-        $this->setApiKey($config['secret_key']);
+        $this->setSecretId($config['secret_id']);
+        $this->setSecretKey($config['secret_key']);
         return;
     }
 
@@ -77,10 +77,11 @@ class Client
      * @return array
      * @author nanjishidu
      */
-    function toUtf8($params){
+    function toUtf8($params)
+    {
         $utf8s = array();
         foreach ($params as $key => $value) {
-            $utf8s[$key] = is_string($value) ? mb_convert_encoding($value, "utf8", INTERNAL_STRING_CHARSET) : $value;
+            $utf8s[$key] = is_string($value) ? mb_convert_encoding($value, "utf8", "auto") : $value;
         }
         return $utf8s;
     }
@@ -94,12 +95,12 @@ class Client
     public function genSignature($params)
     {
         ksort($params);
-        $buff="";
-        foreach($params as $key=>$value){
-            $buff .=$key;
-            $buff .=$value;
+        $buff = "";
+        foreach ($params as $key => $value) {
+            $buff .= $key;
+            $buff .= $value;
         }
-        $buff .= $this->getSecretKey;
+        $buff .= $this->getSecretKey();
         return md5(mb_convert_encoding($buff, "utf8", "auto"));
 
     }
@@ -115,16 +116,22 @@ class Client
         $handlerStack->push(Middleware::retry($this->retryDecider(), $this->retryDelay()));
         $httpClient = new GuzzleHttpClient([
             'timeout' => 10,
+            'verify' => false,
             'handler' => $handlerStack,
         ]);
         // 请求公共参数
-        if (!empty($options)){
+        if (empty($options)) {
             $options['form_params'] = [];
         }
         $options['form_params']['secretId'] = $this->getSecretId();
-        $options['form_params']['timestamp'] = time() * 1000; 
+        $options['form_params']['timestamp'] = time() * 1000;
         $options['form_params']['nonce'] = sprintf("%d", rand());;
         $options['form_params']['signatureMethod'] = 'md5';
+        foreach ($options['form_params'] as $key => $val) {
+            if (is_array($val)) {
+                $options['form_params'][$key] = json_encode($val, JSON_UNESCAPED_UNICODE);
+            }
+        }
         $options['form_params']['signature'] = $this->genSignature($this->toUtf8($options['form_params']));
         try {
             $response = $httpClient->request('POST',

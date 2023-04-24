@@ -19,6 +19,7 @@ class MediaController extends Controller
             return response()->json(['code' => "500", "msg" => "参数错误"]);
         }
         $callbackData = json_decode(trim($callbackData), true);
+        // 处理通用结构
         $callbackTarget = config('yidun.media_solution.callback_target');
         if (!empty($callbackTarget)) {
             app($callbackTarget)->handle($callbackData);

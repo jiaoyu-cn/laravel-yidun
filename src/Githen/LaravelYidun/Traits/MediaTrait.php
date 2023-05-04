@@ -2,6 +2,8 @@
 
 namespace Githen\LaravelYidun\Traits;
 
+use Illuminate\Support\Arr;
+
 trait MediaTrait
 {
     /**
@@ -123,7 +125,7 @@ trait MediaTrait
         if (count($taskIds) > 100) {
             return $this->message('2000', '单次查询支持最多查询100条数据');
         }
-        $params['taskIds'] = json_encode($taskIds, JSON_UNESCAPED_UNICODE);
+        $params['taskIds'] = $taskIds;
         $resp = $this->httpPost($uri, ['form_params' => $params]);
         if ($resp['code'] != 200) {
             return $this->message('2000', '查询失败', $resp['data'] ?? '');
@@ -145,5 +147,55 @@ trait MediaTrait
             return $this->message('2000', '查询失败', $resp['data'] ?? '');
         }
         return $this->message('0000', '查询成功', $resp['result']);
+    }
+
+    /**
+     * 通过Code获取失败原因
+     * @param array|int $params
+     * @return array
+     */
+    public function mediaFailureReasonByCode($code)
+    {
+        $reasonMap = [
+            //音视频
+            1 => '文件格式错误',
+            2 => '文件下载失败',
+            3 => '解析失败',
+            4 => '音频流不存在',
+            //视频
+            110 => '请求重复',
+            120 => '参数错误',
+            130 => '解析错误',
+            140 => '数据类型错误',
+            160 => '视频大小超限（>5G）',
+            //图片
+            610 => '图片下载失败',
+            620 => '图片格式错误',
+            630 => '其他',
+            //文档
+            1000 => '文档大小超过上限',
+            1001 => '文档格式不支持',
+            1002 => '文档下载失败',
+            1004 => '文件数超限',
+            2000 => '文档内容提取失败',
+            2001 => '文档内容提取超时',
+            2002 => '内容加密',
+            3000 => '文档检测失败',
+            3001 => '文档文本检测失败',
+            3002 => '文档图片检测失败',
+            3003 => '检测超时',
+        ];
+        $failureReason = [];
+        if (empty($code)) {
+            return $failureReason;
+        }
+        $code = Arr::wrap($code);
+        foreach ($code as $item) {
+            if (!isset($reasonMap[$item])) {
+                continue;
+            }
+            $failureReason[] = $reasonMap[$item];
+        }
+        return $failureReason;
     }
 }

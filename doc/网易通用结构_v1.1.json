@@ -1,0 +1,146 @@
+{
+    "@task_id": "本次请求数据标识,可以根据该标识查询数据最新结果",
+    "task_id": "6nblwg4dxo90w8mzahme3k0g05009u9d",
+    "@dataId": "数据唯一标识，能够根据该值定位到该条数据，如对数据结果有异议，可以发送该值给客户经理查询",
+    "data_id": "6nblwg4dxo90w8mzahme3k0g05009u9d",
+    "@check_status": "检测状态:1检测中2检测成功3检测失败",
+    "check_status": 2,
+    "@failure_reason": "检测失败原因汇总",
+    "failure_reason": [
+        "文件格式错误",
+        "图片下载失败",
+        "文档图片检测失败"
+    ],
+    "@suggestion": "建议动作:0通过1嫌疑2不通过",
+    "suggestion": 1,
+    "@evidences": "机审证据信息",
+    "evidences": {
+        "@content": "数据来源字段名",
+        "content": [
+            {
+                "@type":"类型支持text image audio video",
+                "type":"text",
+                "@data_id": "检测子数据唯一标识",
+                "data_id": "111",
+                "@suggestion": "建议动作:0通过1嫌疑2不通过",
+                "suggestion": 1,
+                "@labels": "命中的分类信息",
+                "labels": [
+                    {
+                        "@label": "命中分类示例值:100,分类信息,100:色情,200:广告",
+                        "label": 300,
+                        "@sub_label": "细分类",
+                        "sub_label": "50000637",
+                        "@positions": "线索位置",
+                        "positions": [{
+                            "@start_pos": "线索开始坐标",
+                            "start_pos": 0,
+                            "@end_pos": "线索结束坐标",
+                            "end_pos": 5
+                        }],
+                        "@value": "线索内容hitInfos",
+                        "value": "三棱尖刀等"
+                    }
+                ]
+            },{
+                "@type":"类型支持text image audio video",
+                "type":"image",
+                "@data_id": "检测子数据唯一标识",
+                "data_id": "111",
+                "@suggestion": "建议动作:0通过1嫌疑2不通过",
+                "suggestion": 1,
+                "@status": "检测状态:1检测中2检测成功3检测失败",
+                "status": 2,
+                "@failure_reason": "检测失败原因",
+                "failure_reason": "文件格式错误",
+                "@url": "图片下载地址",
+                "url": "图片下载地址",
+                "@labels": "命中的分类信息",
+                "labels": [
+                    {
+                        "@label": "命中分类示例值:100,分类信息,100:色情,200:广告",
+                        "label": 300,
+                        "@sub_label": "细分类",
+                        "sub_label": "50000637",
+                        "@value": "线索内容hitInfos",
+                        "value": "三棱尖刀等",
+                        "@x1": "位置信息，对应目标矩形左上角横坐标相对坐标",
+                        "x1": 0.1916,
+                        "@y1": "位置信息，对应目标矩形左上角纵坐标相对坐标",
+                        "y1": 0.5491,
+                        "@x2": "位置信息，对应目标矩形右下角横坐标相图片对坐标",
+                        "x2": 0.8496,
+                        "@y2": "位置信息，对应目标矩形右下角纵坐标相对坐标",
+                        "y2": 0.6294
+                    }
+                ]
+            },{
+                "@type":"类型支持text image audio video",
+                "type":"audio",
+                "@data_id": "检测子数据唯一标识",
+                "data_id": "111",
+                "@suggestion": "建议动作:0通过1嫌疑2不通过",
+                "suggestion": 1,
+                "@status": "检测状态:1检测中2检测成功3检测失败",
+                "status": 2,
+                "@failure_reason": "检测失败原因",
+                "failure_reason": "文件格式错误",
+                "@duration": "音频时长字段，单位：秒",
+                "duration": 10,
+                "@labels": "命中的分类信息",
+                "labels": [
+                    {
+                        "@label": "命中分类示例值:100,分类信息,100:色情,200:广告",
+                        "label": 300,
+                        "@sub_label": "细分类",
+                        "sub_label": "50000637",
+                        "@value": "线索内容hitInfos",
+                        "value": "三棱尖刀等",
+                        "@start_time": "断句开始时间点，单位秒",
+                        "start_time": 9,
+                        "@end_time": "断句结束时间点，单位秒",
+                        "end_time": 10
+                    }
+                ]
+            },{
+                "@type":"类型支持text image audio video",
+                "type":"video",
+                "@data_id": "检测子数据唯一标识",
+                "data_id": "111",
+                "@suggestion": "建议动作:0通过1嫌疑2不通过",
+                "suggestion": 1,
+                "@status": "检测状态:1检测中2检测成功3检测失败",
+                "status": 2,
+                "@failure_reason": "检测失败原因",
+                "failure_reason": "文件格式错误",
+                "@duration": "视频时长字段，单位：秒",
+                "duration": 10,
+                "@url": "截图下载地址",
+                "url": "截图下载地址",
+                "@labels": "命中的分类信息",
+                "labels": [
+                    {
+                        "@label": "命中分类示例值:100,分类信息,100:色情,200:广告",
+                        "label": 300,
+                        "@sub_label": "细分类",
+                        "sub_label": "50000637",
+                        "@value": "线索内容hitInfos",
+                        "value": "三棱尖刀等",
+                        "@x1": "位置信息，对应目标矩形左上角横坐标相对坐标",
+                        "x1": 0.1916,
+                        "@y1": "位置信息，对应目标矩形左上角纵坐标相对坐标",
+                        "y1": 0.5491,
+                        "@x2": "位置信息，对应目标矩形右下角横坐标相对坐标",
+                        "x2": 0.8496,
+                        "@y2": "位置信息，对应目标矩形右下角纵坐标相对坐标",
+                        "y2": 0.6294,
+                        "@start_time": "证据开始相对时间，单位为毫秒",
+                        "start_time": 9,
+                        "@end_time": "证据结束相对时间，单位为毫秒",
+                        "end_time": 10
+                    }
+                ]
+            }
+        ]
+    }
+}

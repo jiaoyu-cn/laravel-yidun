@@ -34,7 +34,7 @@ class YidunServiceProvider extends LaravelServiceProvider
         });
 
         // 请求路由
-        Route::middleware('web')->post('yidun/media/callback', '\Githen\LaravelYidun\Controllers\MediaController@callback')
+        Route::middleware('web')->get('yidun/media/callback', '\Githen\LaravelYidun\Controllers\MediaController@callback')
             ->name('yidun.media.callback'); // 融媒体解决方案回调
     }
 

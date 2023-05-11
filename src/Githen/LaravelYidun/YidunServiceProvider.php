@@ -4,6 +4,7 @@ namespace Githen\LaravelYidun;
 
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use Illuminate\Support\Facades\Route;
+
 /**
  * 自动注册为服务
  */
@@ -34,8 +35,10 @@ class YidunServiceProvider extends LaravelServiceProvider
         });
 
         // 请求路由
-        Route::middleware('web')->get('yidun/media/callback', '\Githen\LaravelYidun\Controllers\MediaController@callback')
-            ->name('yidun.media.callback'); // 融媒体解决方案回调
+        Route::middleware('web')->post('yidun/media/callback', '\Githen\LaravelYidun\Controllers\MediaController@callback')
+            ->name('yidun.media.callback.post'); // 融媒体解决方案回调
+        Route::middleware('web', 'auth')->get('yidun/media/callback', '\Githen\LaravelYidun\Controllers\MediaController@callback')
+            ->name('yidun.media.callback.get'); // 融媒体解决方案回调
     }
 
     /**

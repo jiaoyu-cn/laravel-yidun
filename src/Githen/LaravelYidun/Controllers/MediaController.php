@@ -22,13 +22,24 @@ class MediaController extends Controller
     {
         $callbackData = $request->input('callbackData', '');
         if (empty($callbackData)) {
+            $taskId = $request->input('task_id', '');
+            if (!empty($taskId)) {
+                $resp = app('yidun')->mediaCallbackQuery($taskId);
+                $callbackData = $resp['data']['0'] ?? [];
+            }
+        } else {
+            $secretId = $request->input('secretId', '');
+            $signature = $request->input('signature', '');
+            $checkSignature = app('yidun')->genSignature(['secretId' => $secretId, 'callbackData' => $callbackData]);
+            if ($signature != $checkSignature) {
+                return response()->json(['code' => "500", "msg" => "校验失败"]);
+            }
+            $callbackData = json_decode(trim($callbackData), true);
+        }
+        if (empty($callbackData)) {
             return response()->json(['code' => "500", "msg" => "参数错误"]);
         }
-        $callbackData = json_decode(trim($callbackData), true);
         $this->showMessage($callbackData);
-//        $resp = app('yidun')->mediaCallbackQuery('zuzrmrx7ooq7w3ufqssjlk0h0500a0kx');
-//        $callbackData = $resp['data']['0'];
-//        $this->showMessage($callbackData);
         // 处理通用结构
         $data = [];
         $antispam = $callbackData['antispam'] ?? [];
@@ -91,7 +102,7 @@ class MediaController extends Controller
                     }
                     foreach ($oneEvidence['segments'] ?? [] as $segment) {
                         $labels = $this->covertLabels('audio', $segment['labels'] ?? [],
-                            ['start_time' => $segment['startTime'] ?? 0, 'end_time' => $segment['endTime'] ?? 0]);
+                            ['start_time' => bcdiv($segment['startTime'] ?? 0, 1000, 2), 'end_time' => bcdiv($segment['endTime'] ?? 0, 1000, 2)]);
                         $data['evidences'][$field][] = array_merge($commonData, ['labels' => $labels]);
                     }
                 }
@@ -110,8 +121,8 @@ class MediaController extends Controller
                     foreach ($oneEvidence['evidences'] ?? [] as $secondType => $secondEvidence) {
                         $commonData['type'] = $secondType;
                         foreach ($secondEvidence[($secondType == 'audio' ? 'segments' : 'pictures')] ?? [] as $segment) {
-                            $labels = $this->covertLabels($fieldType, $segment['labels'] ?? [],
-                                ['start_time' => $segment['startTime'] ?? 0, 'end_time' => $segment['endTime'] ?? 0]);
+                            $labels = $this->covertLabels($commonData['type'], $segment['labels'] ?? [],
+                                ['start_time' => bcdiv($segment['startTime'] ?? 0, 1000, 2), 'end_time' => bcdiv($segment['endTime'] ?? 0, 1000, 2)]);
                             $data['evidences'][$field][] = array_merge($commonData, ['labels' => $labels]);
                         }
                     }
@@ -135,7 +146,7 @@ class MediaController extends Controller
                             if ($commonData['type'] == 'image') {
                                 $commonData['url'] = $secondEvidence['imageUrl'] ?? '';
                             }
-                            $labels = $this->covertLabels($fieldType, $secondEvidence['labels'] ?? []);
+                            $labels = $this->covertLabels($commonData['type'], $secondEvidence['labels'] ?? []);
                             $data['evidences'][$field][] = array_merge($commonData, ['labels' => $labels]);
                         }
                     }
@@ -174,13 +185,14 @@ class MediaController extends Controller
                 continue;
             }
             foreach ($label['subLabels'] as $subLabel) {
+
                 foreach ($subLabel['details']['hitInfos'] ?? [] as $hitInfo) {
                     $item = [
                         "label" => $label['label'],
                         "sub_label" => $subLabel['subLabel'],
                         "value" => $hitInfo['value'] ?? ''
                     ];
-                    if ($type = 'text') {
+                    if ($type == 'text') {
                         $positions = [];
                         foreach ($hitInfo['positions'] ?? [] as $position) {
                             $positions[] = [
@@ -206,6 +218,19 @@ class MediaController extends Controller
                         $item['end_time'] = $appendParams['end_time'] ?? 0;
                     }
                     $data[] = $item;
+                }
+                // 没有命中词
+                if (empty($subLabel['details']['hitInfos'])) {
+                    if (in_array($type, ['audio', 'video'])) {
+                        $item = [
+                            "label" => $label['label'],
+                            "sub_label" => $subLabel['subLabel'],
+                            "value" => '',
+                            'start_time' => $appendParams['start_time'] ?? 0,
+                            'end_time' => $appendParams['end_time'] ?? 0,
+                        ];
+                        $data[] = $item;
+                    }
                 }
             }
         }

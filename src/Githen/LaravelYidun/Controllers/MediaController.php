@@ -93,7 +93,7 @@ class MediaController extends Controller
                         'data_id' => $oneEvidence['dataId'] ?? '',
                         'suggestion' => $oneEvidence['suggestion'],
                         'status' => $oneEvidence['status'] ?? 2,
-                        'duration' => $oneEvidence['duration'] ?? 0,
+                        'duration' => bcdiv($oneEvidence['duration'] ?? 0, 1000, 2),
                         'failure_reason' => '',
                     ];
                     if ($commonData['status'] == 3) {
@@ -111,7 +111,7 @@ class MediaController extends Controller
                         'data_id' => $oneEvidence['dataId'] ?? '',
                         'suggestion' => $oneEvidence['suggestion'],
                         'status' => $oneEvidence['status'] ?? 2,
-                        'duration' => $oneEvidence['duration'] ?? 0,
+                        'duration' => bcdiv($oneEvidence['duration'] ?? 0, 1000, 2),
                         'failure_reason' => '',
                     ];
                     if ($commonData['status'] == 3) {
@@ -155,7 +155,7 @@ class MediaController extends Controller
         }
         $callbackTarget = config('yidun.media_solution.callback_target');
         if (!empty($callbackTarget)) {
-            app($callbackTarget)->handle($data);
+            app($callbackTarget)->handle($data, empty($taskId) ? 'callback' : 'query');
         }
         return response()->json(['code' => "200", "msg" => "接收成功"]);
     }
@@ -181,15 +181,24 @@ class MediaController extends Controller
     {
         $data = [];
         foreach ($labels as $label) {
+            if (empty($label['label'])) {
+                continue;
+            }
             if (empty($label['subLabels'])) {
                 continue;
             }
+            if (empty($label['level'])) {
+                continue;
+            }
             foreach ($label['subLabels'] as $subLabel) {
-
+                if (empty($subLabel['subLabel'])) {
+                    continue;
+                }
                 foreach ($subLabel['details']['hitInfos'] ?? [] as $hitInfo) {
                     $item = [
                         "label" => $label['label'],
                         "sub_label" => $subLabel['subLabel'],
+                        "level" => $label['level'],
                         "value" => $hitInfo['value'] ?? ''
                     ];
                     if ($type == 'text') {
@@ -202,18 +211,34 @@ class MediaController extends Controller
                         }
                         $item['positions'] = $positions;
                     } else if ($type == 'image') {
-                        $item['x1'] = $hitInfo['x1'] ?? 0;
-                        $item['y1'] = $hitInfo['y1'] ?? 0;
-                        $item['x2'] = $hitInfo['x2'] ?? 0;
-                        $item['y2'] = $hitInfo['y2'] ?? 0;
+                        if (isset($hitInfo['x1'])) {
+                            $item['x1'] = $hitInfo['x1'] ?? 0;
+                        }
+                        if (isset($hitInfo['x2'])) {
+                            $item['x2'] = $hitInfo['x2'] ?? 0;
+                        }
+                        if (isset($hitInfo['y1'])) {
+                            $item['y1'] = $hitInfo['y1'] ?? 0;
+                        }
+                        if (isset($hitInfo['y2'])) {
+                            $item['y2'] = $hitInfo['y2'] ?? 0;
+                        }
                     } else if ($type == 'audio') {
                         $item['start_time'] = $appendParams['start_time'] ?? 0;
                         $item['end_time'] = $appendParams['end_time'] ?? 0;
                     } else if ($type == 'video') {
-                        $item['x1'] = $hitInfo['x1'] ?? 0;
-                        $item['y1'] = $hitInfo['y1'] ?? 0;
-                        $item['x2'] = $hitInfo['x2'] ?? 0;
-                        $item['y2'] = $hitInfo['y2'] ?? 0;
+                        if (isset($hitInfo['x1'])) {
+                            $item['x1'] = $hitInfo['x1'] ?? 0;
+                        }
+                        if (isset($hitInfo['x2'])) {
+                            $item['x2'] = $hitInfo['x2'] ?? 0;
+                        }
+                        if (isset($hitInfo['y1'])) {
+                            $item['y1'] = $hitInfo['y1'] ?? 0;
+                        }
+                        if (isset($hitInfo['y2'])) {
+                            $item['y2'] = $hitInfo['y2'] ?? 0;
+                        }
                         $item['start_time'] = $appendParams['start_time'] ?? 0;
                         $item['end_time'] = $appendParams['end_time'] ?? 0;
                     }
@@ -221,16 +246,17 @@ class MediaController extends Controller
                 }
                 // 没有命中词
                 if (empty($subLabel['details']['hitInfos'])) {
+                    $item = [
+                        "label" => $label['label'],
+                        "sub_label" => $subLabel['subLabel'],
+                        "level" => $label['level'],
+                        "value" => ''
+                    ];
                     if (in_array($type, ['audio', 'video'])) {
-                        $item = [
-                            "label" => $label['label'],
-                            "sub_label" => $subLabel['subLabel'],
-                            "value" => '',
-                            'start_time' => $appendParams['start_time'] ?? 0,
-                            'end_time' => $appendParams['end_time'] ?? 0,
-                        ];
-                        $data[] = $item;
+                        $item['start_time'] = $appendParams['start_time'] ?? 0;
+                        $item['end_time'] = $appendParams['end_time'] ?? 0;
                     }
+                    $data[] = $item;
                 }
             }
         }

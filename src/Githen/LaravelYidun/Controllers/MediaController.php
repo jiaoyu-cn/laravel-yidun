@@ -102,7 +102,7 @@ class MediaController extends Controller
                     }
                     foreach ($oneEvidence['segments'] ?? [] as $segment) {
                         $labels = $this->covertLabels('audio', $segment['labels'] ?? [],
-                            ['start_time' => bcdiv($segment['startTime'] ?? 0, 1000, 2), 'end_time' => bcdiv($segment['endTime'] ?? 0, 1000, 2)]);
+                            ['start_time' => $segment['startTime'] ?? 0, 'end_time' => $segment['endTime'] ?? 0]);
                         $data['evidences'][$field][] = array_merge($commonData, ['labels' => $labels]);
                     }
                 }
@@ -122,13 +122,16 @@ class MediaController extends Controller
                         $commonData['type'] = $secondType;
                         foreach ($secondEvidence[($secondType == 'audio' ? 'segments' : 'pictures')] ?? [] as $segment) {
                             $labels = $this->covertLabels($commonData['type'], $segment['labels'] ?? [],
-                                ['start_time' => bcdiv($segment['startTime'] ?? 0, 1000, 2), 'end_time' => bcdiv($segment['endTime'] ?? 0, 1000, 2)]);
+                                ['start_time' => $segment['startTime'] ?? 0, 'end_time' => $segment['endTime'] ?? 0]);
                             $data['evidences'][$field][] = array_merge($commonData, ['labels' => $labels]);
                         }
                     }
                 }
                 if ($oneType == 'files') {
                     foreach ($oneEvidence['evidences'] ?? [] as $secondType => $secondEvidences) {
+                        if (!in_array($secondType, ['texts','images'])){
+                            continue;
+                        }
                         $commonData = [
                             'type' => $secondType == 'texts' ? 'text' : 'image',
                             'data_id' => $oneEvidence['dataId'] ?? '',
@@ -239,8 +242,8 @@ class MediaController extends Controller
                         if (isset($hitInfo['y2'])) {
                             $item['y2'] = $hitInfo['y2'] ?? 0;
                         }
-                        $item['start_time'] = $appendParams['start_time'] ?? 0;
-                        $item['end_time'] = $appendParams['end_time'] ?? 0;
+                        $item['start_time'] = bcdiv($appendParams['start_time'] ?? 0, 1000, 2);
+                        $item['end_time'] = bcdiv($appendParams['end_time'] ?? 0, 1000, 2);
                     }
                     $data[] = $item;
                 }
@@ -252,9 +255,13 @@ class MediaController extends Controller
                         "level" => $label['level'],
                         "value" => ''
                     ];
-                    if (in_array($type, ['audio', 'video'])) {
+                    if ($type == 'audio') {
                         $item['start_time'] = $appendParams['start_time'] ?? 0;
                         $item['end_time'] = $appendParams['end_time'] ?? 0;
+                    }
+                    if ($type == 'video') {
+                        $item['start_time'] = bcdiv($appendParams['start_time'] ?? 0, 1000, 2);
+                        $item['end_time'] = bcdiv($appendParams['end_time'] ?? 0, 1000, 2);
                     }
                     $data[] = $item;
                 }

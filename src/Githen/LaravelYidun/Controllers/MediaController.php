@@ -72,6 +72,9 @@ class MediaController extends Controller
                 if (empty($oneEvidence['suggestion'])) {
                     continue;
                 }
+                //
+                $data['suggestion'] = $oneEvidence['suggestion'] > $data['suggestion'] ? $oneEvidence['suggestion'] : $data['suggestion'];
+
                 if (in_array($oneType, ['texts', 'images'])) {
                     $commonData = [
                         'type' => ($oneType == 'texts' ? 'text' : 'image'),

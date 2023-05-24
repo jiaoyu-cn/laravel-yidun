@@ -69,6 +69,9 @@ class MediaController extends Controller
                     $data['evidences'][$field] = [];
                 }
                 //
+                if (empty($oneEvidence['suggestion'])) {
+                    continue;
+                }
                 if (in_array($oneType, ['texts', 'images'])) {
                     $commonData = [
                         'type' => ($oneType == 'texts' ? 'text' : 'image'),
@@ -109,7 +112,6 @@ class MediaController extends Controller
                 if ($oneType == 'audiovideos') {
                     $commonData = [
                         'data_id' => $oneEvidence['dataId'] ?? '',
-                        'suggestion' => $oneEvidence['suggestion'],
                         'status' => $oneEvidence['status'] ?? 2,
                         'duration' => bcdiv($oneEvidence['duration'] ?? 0, 1000, 2),
                         'failure_reason' => '',
@@ -119,7 +121,11 @@ class MediaController extends Controller
                             app('yidun')->mediaFailureReasonByCode($oneEvidence['failureReason'] ?? 0));
                     }
                     foreach ($oneEvidence['evidences'] ?? [] as $secondType => $secondEvidence) {
+                        if (empty($secondEvidence['suggestion'])) {
+                            continue;
+                        }
                         $commonData['type'] = $secondType;
+                        $commonData['suggestion'] = $secondEvidence['suggestion'];
                         foreach ($secondEvidence[($secondType == 'audio' ? 'segments' : 'pictures')] ?? [] as $segment) {
                             $labels = $this->covertLabels($commonData['type'], $segment['labels'] ?? [],
                                 ['start_time' => $segment['startTime'] ?? 0, 'end_time' => $segment['endTime'] ?? 0]);
@@ -129,13 +135,12 @@ class MediaController extends Controller
                 }
                 if ($oneType == 'files') {
                     foreach ($oneEvidence['evidences'] ?? [] as $secondType => $secondEvidences) {
-                        if (!in_array($secondType, ['texts','images'])){
+                        if (!in_array($secondType, ['texts', 'images'])) {
                             continue;
                         }
                         $commonData = [
                             'type' => $secondType == 'texts' ? 'text' : 'image',
                             'data_id' => $oneEvidence['dataId'] ?? '',
-                            'suggestion' => $oneEvidence['suggestion'],
                         ];
                         if ($commonData['type'] == 'image') {
                             $commonData['status'] = $oneEvidence['status'] ?? 2;
@@ -146,6 +151,10 @@ class MediaController extends Controller
                             }
                         }
                         foreach ($secondEvidences as $secondEvidence) {
+                            if (empty($secondEvidence['suggestion'])) {
+                                continue;
+                            }
+                            $commonData['suggestion'] = $secondEvidence['suggestion'];
                             if ($commonData['type'] == 'image') {
                                 $commonData['url'] = $secondEvidence['imageUrl'] ?? '';
                             }

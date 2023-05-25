@@ -31,6 +31,8 @@
                         "label": 300,
                         "@sub_label": "细分类",
                         "sub_label": "50000637",
+                        "@page": "证据文本所在文档页码，目前仅对pdf格式生效，返回pdf文档对应页码",
+                        "page": 1,
                         "@positions": "线索位置",
                         "positions": [{
                             "@start_pos": "线索开始坐标",
@@ -62,6 +64,8 @@
                         "label": 300,
                         "@sub_label": "细分类",
                         "sub_label": "50000637",
+                        "@page": "证据文本所在文档页码，目前仅对pdf格式生效，返回pdf文档对应页码",
+                        "page": 1,
                         "@value": "线索内容hitInfos",
                         "value": "三棱尖刀等",
                         "@x1": "位置信息，对应目标矩形左上角横坐标相对坐标",

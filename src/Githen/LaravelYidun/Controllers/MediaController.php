@@ -161,7 +161,7 @@ class MediaController extends Controller
                             if ($commonData['type'] == 'image') {
                                 $commonData['url'] = $secondEvidence['imageUrl'] ?? '';
                             }
-                            $labels = $this->covertLabels($commonData['type'], $secondEvidence['labels'] ?? []);
+                            $labels = $this->covertLabels($commonData['type'], $secondEvidence['labels'] ?? [], ['page' => $secondEvidence['page'] ?? 0]);
                             $data['evidences'][$field][] = array_merge($commonData, ['labels' => $labels]);
                         }
                     }
@@ -225,6 +225,7 @@ class MediaController extends Controller
                             ];
                         }
                         $item['positions'] = $positions;
+                        $item['page'] = $appendParams['page'] ?? 0;
                     } else if ($type == 'image') {
                         if (isset($hitInfo['x1'])) {
                             $item['x1'] = $hitInfo['x1'] ?? 0;
@@ -238,6 +239,7 @@ class MediaController extends Controller
                         if (isset($hitInfo['y2'])) {
                             $item['y2'] = $hitInfo['y2'] ?? 0;
                         }
+                        $item['page'] = $appendParams['page'] ?? 0;
                     } else if ($type == 'audio') {
                         $item['start_time'] = $appendParams['start_time'] ?? 0;
                         $item['end_time'] = $appendParams['end_time'] ?? 0;

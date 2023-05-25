@@ -3,7 +3,9 @@
 namespace Githen\LaravelYidun;
 
 use Illuminate\Support\Str;
+use Githen\LaravelYidun\Traits\UtilsTrait;
 use Githen\LaravelYidun\Traits\MediaTrait;
+use Githen\LaravelYidun\Traits\LabelTrait;
 use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
@@ -14,7 +16,9 @@ use GuzzleHttp\Client as GuzzleHttpClient;
 
 class Client
 {
+    use UtilsTrait;
     use MediaTrait;
+    use LabelTrait;
 
     /**
      * The Secret Id
@@ -71,39 +75,6 @@ class Client
         return;
     }
 
-    /**
-     * 将输入数据的编码统一转换成utf8
-     * @params array 输入的参数
-     * @return array
-     * @author nanjishidu
-     */
-    function toUtf8($params)
-    {
-        $utf8s = array();
-        foreach ($params as $key => $value) {
-            $utf8s[$key] = is_string($value) ? mb_convert_encoding($value, "utf8", "auto") : $value;
-        }
-        return $utf8s;
-    }
-
-    /**
-     * 生成签名信息
-     * @param string $apiURL
-     * @return string
-     * @author nanjishidu
-     */
-    public function genSignature($params)
-    {
-        ksort($params);
-        $buff = "";
-        foreach ($params as $key => $value) {
-            $buff .= $key;
-            $buff .= $value;
-        }
-        $buff .= $this->getSecretKey();
-        return md5(mb_convert_encoding($buff, "utf8", "auto"));
-
-    }
 
     /**
      * @param $uri

@@ -4,6 +4,7 @@ namespace Githen\LaravelYidun\Providers;
 
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Client;
 
 /**
  * 自动注册为服务

@@ -1,6 +1,6 @@
 <?php
 
-namespace Githen\LaravelYidun\Controllers;
+namespace Githen\LaravelYidun\App\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;

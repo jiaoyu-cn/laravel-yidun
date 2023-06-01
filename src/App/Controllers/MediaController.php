@@ -4,7 +4,6 @@ namespace Githen\LaravelYidun\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 
 class MediaController extends Controller

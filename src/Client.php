@@ -2,7 +2,6 @@
 
 namespace Githen\LaravelYidun;
 
-use Illuminate\Support\Str;
 use Githen\LaravelYidun\Traits\UtilsTrait;
 use Githen\LaravelYidun\Traits\MediaTrait;
 use Githen\LaravelYidun\Traits\LabelTrait;
@@ -11,7 +10,6 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\RequestOptions;
 use GuzzleHttp\Client as GuzzleHttpClient;
 
 class Client

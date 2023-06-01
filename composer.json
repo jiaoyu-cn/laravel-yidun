@@ -5,7 +5,7 @@
     "type": "library",
     "autoload": {
       "psr-4": {
-        "Githen\\LaravelYidun\\": "src/Githen/LaravelYidun"
+        "Githen\\LaravelYidun\\": "src"
       }
     },
     "authors": [
@@ -23,7 +23,7 @@
     "extra": {
       "laravel": {
         "providers": [
-          "Githen\\LaravelYidun\\YidunServiceProvider"
+          "Githen\\LaravelYidun\\Providers\\YidunServiceProvider"
         ],
         "aliases": {
           "Yidun": "Githen\\LaravelYidun\\Facades\\Yidun"

@@ -17,7 +17,7 @@ class YidunServiceProvider extends LaravelServiceProvider
      */
     public function boot()
     {
-        $this->publishes([__DIR__ . '/../../config/config.php' => config_path('yidun.php')]);
+        $this->publishes([__DIR__ . '/../config/config.php' => config_path('yidun.php')]);
     }
 
     /**
@@ -35,9 +35,9 @@ class YidunServiceProvider extends LaravelServiceProvider
         });
 
         // 请求路由
-        Route::middleware('web')->post('yidun/media/callback', '\Githen\LaravelYidun\Controllers\MediaController@callback')
+        Route::middleware('web')->post('yidun/media/callback', '\Githen\LaravelYidun\App\Controllers\MediaController@callback')
             ->name('yidun.media.callback.post'); // 融媒体解决方案回调
-        Route::middleware('web', 'auth')->get('yidun/media/callback', '\Githen\LaravelYidun\Controllers\MediaController@callback')
+        Route::middleware('web', 'auth')->get('yidun/media/callback', '\Githen\LaravelYidun\App\Controllers\MediaController@callback')
             ->name('yidun.media.callback.get'); // 融媒体解决方案回调
     }
 

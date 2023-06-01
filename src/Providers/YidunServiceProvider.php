@@ -1,6 +1,6 @@
 <?php
 
-namespace Githen\LaravelYidun;
+namespace Githen\LaravelYidun\Providers;
 
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use Illuminate\Support\Facades\Route;

@@ -12,7 +12,7 @@
 composer require githen/laravel-yidun:~v1.1.0
 
 # 迁移配置文件
-php artisan vendor:publish --provider="Githen\LaravelYidun\YidunServiceProvider"
+php artisan vendor:publish --provider="Githen\LaravelYidun\Providers\YidunServiceProvider"
 ```
 
 ## 配置文件说明

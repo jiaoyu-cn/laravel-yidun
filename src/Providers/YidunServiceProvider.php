@@ -28,7 +28,7 @@ class YidunServiceProvider extends LaravelServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('yidun', function ($app) {
+        $this->app->singleton('jiaoyu.yidun', function ($app) {
             return new Client([
                 'secret_id' => $app['config']->get('yidun.secret_id'),
                 'secret_key' => $app['config']->get('yidun.secret_key'),

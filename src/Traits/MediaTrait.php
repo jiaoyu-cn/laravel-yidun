@@ -2,6 +2,7 @@
 
 namespace Githen\LaravelYidun\Traits;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Arr;
 
 trait MediaTrait
@@ -138,7 +139,7 @@ trait MediaTrait
      * @param array $params
      * @return array
      */
-    public function mediaCallbacResults($params)
+    public function mediaCallbackResults($params)
     {
         $uri = 'https://as.dun.163.com/v2/mediasolution/callback/results';
         $params['version'] = 'v2';
@@ -197,5 +198,235 @@ trait MediaTrait
             $failureReason[] = $reasonMap[$item];
         }
         return $failureReason;
+    }
+
+    /**
+     * 融媒体结果处理
+     * @param array $params
+     * @return array
+     */
+    public function mediaCallbackCovert($callbackData)
+    {
+        // 处理通用结构
+        $antispam = $callbackData['antispam'] ?? [];
+        if (empty($antispam)) {
+            return $this->message('2000', '参数错误');
+        }
+        if (empty($antispam['checkStatus']) || $antispam['checkStatus'] == 1) {
+            return $this->message('2000', '检测进行中,task_id:' . $antispam['taskId']);
+        }
+        $data = [
+            'task_id' => $antispam['taskId'],
+            'data_id' => $antispam['dataId'] ?? '',
+            'check_status' => $antispam['checkStatus'],
+            'suggestion' => $antispam['suggestion'],
+            'failure_reason' => [],
+            'evidences' => [],
+        ];
+        if ($antispam['checkStatus'] == 3) {
+            $code = array_column($antispam['solutionEnrichEvidence']['failedUnits'] ?? [], 'failureReason');
+            $data['failure_reason'] = $this->mediaFailureReasonByCode($code);
+        }
+        $evidences = $antispam['evidences'] ?? [];
+        foreach ($evidences as $oneType => $oneEvidences) {
+            foreach ($oneEvidences as $oneEvidence) {
+                $field = $oneEvidence['field'] ?? '';
+                if (empty($field)) {
+                    continue;
+                }
+                if (!isset($data['evidences'][$field])) {
+                    $data['evidences'][$field] = [];
+                }
+                //
+                if (empty($oneEvidence['suggestion'])) {
+                    continue;
+                }
+                //
+                $data['suggestion'] = $oneEvidence['suggestion'] > $data['suggestion'] ? $oneEvidence['suggestion'] : $data['suggestion'];
+
+                if (in_array($oneType, ['texts', 'images'])) {
+                    $commonData = [
+                        'type' => ($oneType == 'texts' ? 'text' : 'image'),
+                        'data_id' => $oneEvidence['dataId'] ?? '',
+                        'suggestion' => $oneEvidence['suggestion'],
+                    ];
+                    if ($commonData['type'] == 'image') {
+                        $commonData['status'] = $oneEvidence['status'] ?? 2;
+                        $commonData['failure_reason'] = '';
+                        $commonData['url'] = '';
+                        if ($commonData['status'] == 3) {
+                            $commonData['failure_reason'] = implode(',', $this->mediaFailureReasonByCode($oneEvidence['failureReason'] ?? 0));
+                        }
+                    }
+                    $labels = $this->covertLabels($commonData['type'], $oneEvidence['labels'] ?? []);
+                    $data['evidences'][$field][] = array_merge($commonData, ['labels' => $labels]);
+                }
+                if ($oneType == 'audios') {
+                    $commonData = [
+                        'type' => 'audio',
+                        'data_id' => $oneEvidence['dataId'] ?? '',
+                        'suggestion' => $oneEvidence['suggestion'],
+                        'status' => $oneEvidence['status'] ?? 2,
+                        'duration' => bcdiv($oneEvidence['duration'] ?? 0, 1000, 2),
+                        'failure_reason' => '',
+                    ];
+                    if ($commonData['status'] == 3) {
+                        $commonData['failure_reason'] = implode(',', $this->mediaFailureReasonByCode($oneEvidence['failureReason'] ?? 0));
+                    }
+                    foreach ($oneEvidence['segments'] ?? [] as $segment) {
+                        $labels = $this->covertLabels('audio', $segment['labels'] ?? [],
+                            ['start_time' => $segment['startTime'] ?? 0, 'end_time' => $segment['endTime'] ?? 0]);
+                        $data['evidences'][$field][] = array_merge($commonData, ['labels' => $labels]);
+                    }
+                }
+                if ($oneType == 'audiovideos') {
+                    $commonData = [
+                        'data_id' => $oneEvidence['dataId'] ?? '',
+                        'status' => $oneEvidence['status'] ?? 2,
+                        'duration' => bcdiv($oneEvidence['duration'] ?? 0, 1000, 2),
+                        'failure_reason' => '',
+                    ];
+                    if ($commonData['status'] == 3) {
+                        $commonData['failure_reason'] = implode(',', $this->mediaFailureReasonByCode($oneEvidence['failureReason'] ?? 0));
+                    }
+                    foreach ($oneEvidence['evidences'] ?? [] as $secondType => $secondEvidence) {
+                        if (empty($secondEvidence['suggestion'])) {
+                            continue;
+                        }
+                        $commonData['type'] = $secondType;
+                        $commonData['suggestion'] = $secondEvidence['suggestion'];
+                        foreach ($secondEvidence[($secondType == 'audio' ? 'segments' : 'pictures')] ?? [] as $segment) {
+                            $labels = $this->covertLabels($commonData['type'], $segment['labels'] ?? [],
+                                ['start_time' => $segment['startTime'] ?? 0, 'end_time' => $segment['endTime'] ?? 0]);
+                            $data['evidences'][$field][] = array_merge($commonData, ['labels' => $labels]);
+                        }
+                    }
+                }
+                if ($oneType == 'files') {
+                    foreach ($oneEvidence['evidences'] ?? [] as $secondType => $secondEvidences) {
+                        if (!in_array($secondType, ['texts', 'images'])) {
+                            continue;
+                        }
+                        $commonData = [
+                            'type' => $secondType == 'texts' ? 'text' : 'image',
+                            'data_id' => $oneEvidence['dataId'] ?? '',
+                        ];
+                        if ($commonData['type'] == 'image') {
+                            $commonData['status'] = $oneEvidence['status'] ?? 2;
+                            $commonData['failure_reason'] = '';
+                            if ($commonData['status'] == 3) {
+                                $commonData['failure_reason'] = implode(',', $this->mediaFailureReasonByCode($oneEvidence['failureReason'] ?? 0));
+                            }
+                        }
+                        foreach ($secondEvidences as $secondEvidence) {
+                            if (empty($secondEvidence['suggestion'])) {
+                                continue;
+                            }
+                            $commonData['suggestion'] = $secondEvidence['suggestion'];
+                            if ($commonData['type'] == 'image') {
+                                $commonData['url'] = $secondEvidence['imageUrl'] ?? '';
+                            }
+                            $labels = $this->covertLabels($commonData['type'], $secondEvidence['labels'] ?? [], ['page' => $secondEvidence['page'] ?? 0]);
+                            $data['evidences'][$field][] = array_merge($commonData, ['labels' => $labels]);
+                        }
+                    }
+                }
+            }
+        }
+        return $this->message('0000', '成功', $data);
+    }
+
+
+
+    private function covertLabels($type, $labels, $appendParams = [])
+    {
+        $data = [];
+        foreach ($labels as $label) {
+            if (empty($label['label'])) {
+                continue;
+            }
+            if (empty($label['subLabels'])) {
+                continue;
+            }
+            if (empty($label['level'])) {
+                continue;
+            }
+            foreach ($label['subLabels'] as $subLabel) {
+                if (empty($subLabel['subLabel'])) {
+                    continue;
+                }
+                foreach ($subLabel['details']['hitInfos'] ?? [] as $hitInfo) {
+                    $item = [
+                        "label" => $label['label'],
+                        "sub_label" => $subLabel['subLabel'],
+                        "level" => $label['level'],
+                        "value" => $hitInfo['value'] ?? ''
+                    ];
+                    if ($type == 'text') {
+                        $positions = [];
+                        foreach ($hitInfo['positions'] ?? [] as $position) {
+                            $positions[] = [
+                                'start_pos' => $position['startPos'] ?? 0,
+                                'end_pos' => $position['endPos'] ?? 0,
+                            ];
+                        }
+                        $item['positions'] = $positions;
+                        $item['page'] = $appendParams['page'] ?? 0;
+                    } else if ($type == 'image') {
+                        if (isset($hitInfo['x1'])) {
+                            $item['x1'] = $hitInfo['x1'] ?? 0;
+                        }
+                        if (isset($hitInfo['x2'])) {
+                            $item['x2'] = $hitInfo['x2'] ?? 0;
+                        }
+                        if (isset($hitInfo['y1'])) {
+                            $item['y1'] = $hitInfo['y1'] ?? 0;
+                        }
+                        if (isset($hitInfo['y2'])) {
+                            $item['y2'] = $hitInfo['y2'] ?? 0;
+                        }
+                        $item['page'] = $appendParams['page'] ?? 0;
+                    } else if ($type == 'audio') {
+                        $item['start_time'] = $appendParams['start_time'] ?? 0;
+                        $item['end_time'] = $appendParams['end_time'] ?? 0;
+                    } else if ($type == 'video') {
+                        if (isset($hitInfo['x1'])) {
+                            $item['x1'] = $hitInfo['x1'] ?? 0;
+                        }
+                        if (isset($hitInfo['x2'])) {
+                            $item['x2'] = $hitInfo['x2'] ?? 0;
+                        }
+                        if (isset($hitInfo['y1'])) {
+                            $item['y1'] = $hitInfo['y1'] ?? 0;
+                        }
+                        if (isset($hitInfo['y2'])) {
+                            $item['y2'] = $hitInfo['y2'] ?? 0;
+                        }
+                        $item['start_time'] = bcdiv($appendParams['start_time'] ?? 0, 1000, 2);
+                        $item['end_time'] = bcdiv($appendParams['end_time'] ?? 0, 1000, 2);
+                    }
+                    $data[] = $item;
+                }
+                // 没有命中词
+                if (empty($subLabel['details']['hitInfos'])) {
+                    $item = [
+                        "label" => $label['label'],
+                        "sub_label" => $subLabel['subLabel'],
+                        "level" => $label['level'],
+                        "value" => ''
+                    ];
+                    if ($type == 'audio') {
+                        $item['start_time'] = $appendParams['start_time'] ?? 0;
+                        $item['end_time'] = $appendParams['end_time'] ?? 0;
+                    }
+                    if ($type == 'video') {
+                        $item['start_time'] = bcdiv($appendParams['start_time'] ?? 0, 1000, 2);
+                        $item['end_time'] = bcdiv($appendParams['end_time'] ?? 0, 1000, 2);
+                    }
+                    $data[] = $item;
+                }
+            }
+        }
+        return $data;
     }
 }

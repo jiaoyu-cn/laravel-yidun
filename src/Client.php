@@ -174,4 +174,20 @@ class Client
         return ['code' => $code, 'message' => $message, 'data' => $data];
     }
 
+    public function showMessage($data, $status = 1)
+    {
+        $channel = config('yidun.log_channel', '');
+        if (empty($channel)) {
+            return;
+        }
+        if (is_array($data)) {
+            $data = json_encode($data, JSON_UNESCAPED_UNICODE);
+        }
+        if ($status == 1) {
+            Log::channel($channel)->info($data);
+            return;
+        }
+        Log::channel($channel)->error($data);
+    }
+
 }

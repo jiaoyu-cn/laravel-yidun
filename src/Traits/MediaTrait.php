@@ -2,7 +2,6 @@
 
 namespace Githen\LaravelYidun\Traits;
 
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Arr;
 
 trait MediaTrait

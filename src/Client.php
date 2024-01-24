@@ -5,12 +5,15 @@ namespace Githen\LaravelYidun;
 use Githen\LaravelYidun\Traits\UtilsTrait;
 use Githen\LaravelYidun\Traits\MediaTrait;
 use Githen\LaravelYidun\Traits\LabelTrait;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Client as GuzzleHttpClient;
+use Illuminate\Support\Facades\Log;
 
 class Client
 {

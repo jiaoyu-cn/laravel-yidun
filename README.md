@@ -6,6 +6,7 @@
 [![image](https://img.shields.io/github/forks/jiaoyu-cn/laravel-yidun)](https://github.com/jiaoyu-cn/laravel-yidun/network/members)
 [![image](https://img.shields.io/github/issues/jiaoyu-cn/laravel-yidun)](https://github.com/jiaoyu-cn/laravel-yidun/issues)
 
+[易盾检测融媒体解决方案_开发文档](https://support.dun.163.com/documents/599750646047514624?docId=599758618022715392)
 ## 安装
 
 ```shell

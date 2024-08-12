@@ -23,7 +23,7 @@ class MediaController extends Controller
             // 支持task_id 更新
             $taskId = $request->input('task_id', '');
             if (!empty($taskId)) {
-                $resp = app('yidun')->mediaCallbackQuery($taskId);
+                $resp = app('jiaoyu.yidun')->mediaCallbackQuery($taskId);
                 if ($resp['code'] != '0000') {
                     return response()->json(['code' => "500", "msg" => $resp['message']]);
                 }
@@ -32,15 +32,15 @@ class MediaController extends Controller
         } else {
             $secretId = $request->input('secretId', '');
             $signature = $request->input('signature', '');
-            $checkSignature = app('yidun')->genSignature(['secretId' => $secretId, 'callbackData' => $callbackData]);
+            $checkSignature = app('jiaoyu.yidun')->genSignature(['secretId' => $secretId, 'callbackData' => $callbackData]);
             if ($signature != $checkSignature) {
                 return response()->json(['code' => "500", "msg" => "校验失败"]);
             }
             $callbackData = json_decode(trim($callbackData), true);
         }
-        app('yidun')->showMessage($callbackData);
+        app('jiaoyu.yidun')->showMessage($callbackData);
         // 处理通用结构
-        $covertData = app('yidun')->mediaCallbackCovert($callbackData);
+        $covertData = app('jiaoyu.yidun')->mediaCallbackCovert($callbackData);
         if ($covertData['code'] != '0000') {
             return response()->json(['code' => "500", "msg" => $covertData['message']]);
         }

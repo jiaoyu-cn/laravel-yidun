@@ -49,7 +49,7 @@ class YidunServiceProvider extends LaravelServiceProvider
      */
     public function provides()
     {
-        return array('yidun');
+        return array('jiaoyu.yidun');
     }
 
 }

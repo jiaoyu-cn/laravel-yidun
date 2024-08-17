@@ -12,7 +12,7 @@ class Yidun extends Facade {
      */
     protected static function getFacadeAccessor()
     {
-        return 'yidun';
+        return 'jiaoyu.yidun';
     }
 
 }

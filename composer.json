@@ -17,8 +17,8 @@
     "require": {
       "php": "^7.3",
       "ext-json": "*",
-      "illuminate/support": "^6.20",
-      "guzzlehttp/guzzle": "~6.0"
+      "illuminate/support": "^6.20|^8.0",
+      "guzzlehttp/guzzle": "~6.0|^7.0"
     },
     "extra": {
       "laravel": {

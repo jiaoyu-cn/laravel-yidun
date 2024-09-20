@@ -15,7 +15,7 @@ trait MediaTrait
     {
         $checkData = $this->mediaCheck($params);
         if ($checkData['code'] != '0000') {
-            return $this->message('2000', $checkData['mesage']);
+            return $this->message('2000', $checkData['message']);
         }
 
         $uri = 'https://as.dun.163.com/v2/mediasolution/submit';
